@@ -1,40 +1,44 @@
-name: "Upload Artifacts"
-description: "Uploads build artifacts to S3 bucket."
+name: "Upload Artifact to Artifactory"
+description: "Uploads a single build artifact to JFrog Artifactory using JFrog CLI."
 
 inputs:
-  path:
-    description: Directory containing the files to upload
+  file:
+    description: Path to the file to upload
     required: true
   destination:
-    description: Destination path in the target storage
+    description: Destination path in Artifactory (e.g., repo/path/filename.ext)
     required: true
-  s3_bucket:
-    description: S3 bucket name
+  artifactory_url:
+    description: Base URL of the JFrog Artifactory instance
+    required: true
+  artifactory_user:
+    description: Artifactory username
+    required: true
+  artifactory_api_key:
+    description: Artifactory API key or password
     required: true
 
 runs:
   using: "composite"
   steps:
-    - name: Ensure AWS CLI is available
+    - name: Install JFrog CLI
       shell: bash
       run: |
-        if ! command -v aws &> /dev/null; then
-          echo "Installing AWS CLI..."
-          apt-get update && apt-get install -y awscli
-        else
-          echo "AWS CLI is already available."
-        fi
+        mkdir -p $HOME/.jfrog
+        curl -fL https://releases.jfrog.io/artifactory/jfrog-cli/v2-jf/2.53.0/jfrog-cli-linux-amd64/jf -o $HOME/.jfrog/jf
+        chmod +x $HOME/.jfrog/jf
+        echo "$HOME/.jfrog" >> $GITHUB_PATH
 
-    - name: Check AWS credentials
+    - name: Configure JFrog CLI
       shell: bash
       run: |
-        if ! aws sts get-caller-identity &> /dev/null; then
-          echo "AWS credentials are missing or invalid."
-          exit 1
-        fi
+        jf config add artifactory-server \
+          --url="${{ inputs.artifactory_url }}" \
+          --user="${{ inputs.artifactory_user }}" \
+          --password="${{ inputs.artifactory_api_key }}" \
+          --interactive=false
 
-    - name: Upload artifacts
+    - name: Upload file to Artifactory
       shell: bash
       run: |
-        aws s3 cp "${{ inputs.path }}" "s3://${{ inputs.s3_bucket }}/${{ inputs.destination }}" --recursive
-
+        jf rt u "${{ inputs.file }}" "${{ inputs.destination }}" --server-id=artifactory-server
