@@ -48,11 +48,20 @@ def upload_file(args):
         url = r.headers["location"]
         path = os.path.join(base, name)
         for x in (1, 2, 3, 0):
-            r = requests.put(
-                url,
-                data=open(path, "rb"),
-                headers={"Content-type": "application/octet-stream"},
-            )
+            try:
+                r = requests.put(
+                    url,
+                    data=open(path, "rb"),
+                    headers={"Content-type": "application/octet-stream"},
+                )
+            except Exception as e:
+                print(
+                    f"Unexpected error uploading {name}: {e}",
+                    flush=True,
+                    file=sys.stderr,
+                )
+                sleep(x)
+                continue
             if not r.ok:
                 if not x:
                     return (
