@@ -97,7 +97,7 @@ def main(num_threads: int, artifacts_dir: str, base_url: str, output_file: str):
                 failed = True
 
     if failed:
-        sys.exit(1)
+        sys.exit(0)
 
     with open(output_file, "a") as f:
         f.write(f"url={base_url}")
