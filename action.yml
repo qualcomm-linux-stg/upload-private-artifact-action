@@ -13,40 +13,5 @@ inputs:
     required: true
 
 runs:
-  using: "composite"
-  steps:
-    - name: Ensure AWS CLI is available
-      shell: bash
-      run: |
-        if ! command -v aws &> /dev/null; then
-          echo "Installing AWS CLI..."
-          apt-get update && apt-get install -y unzip
-
-          ARCH=$(uname -m)
-          if [ "$ARCH" = "x86_64" ]; then
-              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          elif [ "$ARCH" = "aarch64" ]; then
-              curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
-          else
-              echo "Unsupported architecture: $ARCH"
-              exit 1
-          fi
-          unzip awscliv2.zip
-          sudo ./aws/install       
-        else
-          echo "AWS CLI is already available."
-        fi
-
-    - name: Check AWS credentials
-      shell: bash
-      run: |
-        if ! aws sts get-caller-identity &> /dev/null; then
-          echo "AWS credentials are missing or invalid."
-          exit 1
-        fi
-
-    - name: Upload artifacts
-      shell: bash
-      run: |
-        aws s3 cp "${{ inputs.path }}" "s3://${{ inputs.s3_bucket }}/${{ inputs.destination }}" --recursive
-
+  using: docker
+  image: Dockerfile
