@@ -1,6 +1,10 @@
 FROM public.ecr.aws/docker/library/alpine:3.21
 
-RUN apk add python3 py3-requests
+# Install dependencies
+RUN apk add --no-cache aws-cli
 
-COPY publish_artifacts.py /
-ENTRYPOINT ["/publish_artifacts.py"]
+# Copy entrypoint script into the container
+COPY --chmod=0755 publish_artifacts.sh /
+
+ENTRYPOINT ["/publish_artifacts.sh"]
+
