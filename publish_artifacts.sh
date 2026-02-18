@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+# Step 1: Check AWS credentials
+if ! aws sts get-caller-identity &> /dev/null; then
+  echo "AWS credentials are missing or invalid."
+  exit 1
+fi
+
+# Step 2: Upload artifacts
+aws s3 cp "$INPUT_PATH" "s3://$INPUT_S3_BUCKET/$INPUT_DESTINATION" --recursive
