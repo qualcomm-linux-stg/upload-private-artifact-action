@@ -13,7 +13,7 @@ RUN ARCH=$(uname -m) && \
         echo "Unsupported architecture: $ARCH" && exit 1; \
     fi && \
     unzip awscliv2.zip && \
-    ./aws/install && \
+    ./aws/install --bin-dir /usr/bin --install-dir /usr/local/aws-cli --update && \
     rm -rf aws awscliv2.zip
 
 # Copy entrypoint script into the container
