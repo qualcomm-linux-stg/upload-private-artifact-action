@@ -1,6 +1,5 @@
 FROM public.ecr.aws/docker/library/alpine:3.21
 
-# Install dependencies
 RUN apk add --no-cache curl unzip
 
 # Install AWS CLI v2
@@ -16,8 +15,8 @@ RUN ARCH=$(uname -m) && \
     ./aws/install --bin-dir /usr/bin --install-dir /usr/local/aws-cli --update && \
     rm -rf aws awscliv2.zip
 
-# Copy entrypoint script into the container
+# Ensure aws is on PATH
+ENV PATH="/usr/local/aws-cli/v2/current/bin:${PATH}"
+
 COPY publish_artifacts.sh /
-
 ENTRYPOINT ["/publish_artifacts.sh"]
-
