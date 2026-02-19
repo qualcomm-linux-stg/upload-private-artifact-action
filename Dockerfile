@@ -1,6 +1,6 @@
-FROM public.ecr.aws/docker/library/alpine:3.21
+FROM public.ecr.aws/ubuntu/ubuntu:24.04
 
-RUN apk add --no-cache curl unzip
+RUN apt install -y curl unzip
 
 # Install AWS CLI v2
 RUN ARCH=$(uname -m) && \
@@ -12,11 +12,8 @@ RUN ARCH=$(uname -m) && \
         echo "Unsupported architecture: $ARCH" && exit 1; \
     fi && \
     unzip awscliv2.zip && \
-    ./aws/install --bin-dir /usr/bin --install-dir /usr/local/aws-cli --update && \
+    ./aws/install && \
     rm -rf aws awscliv2.zip
-
-# Ensure aws is on PATH
-ENV PATH="/usr/local/aws-cli/v2/current/bin:${PATH}"
 
 COPY publish_artifacts.sh /
 ENTRYPOINT ["/publish_artifacts.sh"]
