@@ -1,6 +1,8 @@
 FROM public.ecr.aws/ubuntu/ubuntu:24.04
 
-RUN apt install -y curl unzip
+# Update package index and install dependencies
+RUN apt-get update && apt-get install -y curl unzip \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install AWS CLI v2
 RUN ARCH=$(uname -m) && \
